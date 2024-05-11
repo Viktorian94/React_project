@@ -1,4 +1,4 @@
-import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useMemo, useReducer, useRef, useState, useSyncExternalStore } from 'react';
 import './App.css';
 import { Form } from './Components/Form';
 import { Task } from './Components/Task';
@@ -6,14 +6,31 @@ import { Task } from './Components/Task';
 function App() {
   const [task, setTask] = useState([])
 
-  const addTask = (userInput) => { /*додавання задачі*/
+  const tasksContent = useMemo(() => 
+    task.map((task) => {
+      return(
+        <Task
+        task = {task}
+        key = {task.id}
+        toggleTask = {handleToggle}
+        removeTask = {removeTask}
+        />
+      )
+  }), [task])
+
+  /**
+   * This function is adding new task to all tasks
+   * @param {*} userInput user's input text
+   */
+  const addTask = (userInput) => {
     if(userInput){
       const item = {
         id: task.length + 1,
         title: userInput,
         iscomplete: false,
       }
-      setTask([...task, item])
+      
+      setTask(prev => [...prev, item])
     }
   }
 
@@ -26,7 +43,7 @@ function App() {
       ...task.map((task) => task.id === id ? {...task, iscomplete: !task.iscomplete} : {...task}
       )
     ])
-  } 
+  }
 
   return (
     <>
@@ -40,16 +57,7 @@ function App() {
       <div className='tasks'>
         <h3>Quantity of tasks {task.length}</h3>
         <Form addTask = {addTask}/>
-        {task.map((task) => {
-          return(
-            <Task
-            task = {task}
-            key = {task.id}
-            toggleTask = {handleToggle}
-            removeTask = {removeTask}
-            />
-          )
-        })}
+        {tasksContent}
       </div>
     </body>
     </>
